@@ -1,0 +1,46 @@
+plugins {
+    id 'org.quiltmc.gradle' version '0.1.0-SNAPSHOT'
+	id 'maven-publish'
+}
+
+group = 'org.quiltmc.gradle.test'
+version = '0.1.0'
+
+dependencies {
+    game minecraft.client('1.19.3')
+
+    intermediate 'org.quiltmc:hashed:1.19.3'
+    mappings 'org.quiltmc:quilt-mappings:1.19.3+build.23'
+    via 'net.fabricmc:intermediary:1.19.3:v2'
+
+    modImplementation 'org.quiltmc:quilt-loader:0.18.1-beta.78'
+
+	modImplementation 'org.quiltmc:qsl:4.0.0-beta.11+1.19.3'
+
+	implementation 'net.fabricmc:tiny-mappings-parser:0.3.0+build.17'
+	implementation 'net.fabricmc:sponge-mixin:0.11.4+mixin.0.8.5'
+	implementation 'net.fabricmc:tiny-remapper:0.8.6'
+	implementation 'net.fabricmc:access-widener:2.1.0'
+	implementation 'org.quiltmc:quilt-json5:1.0.2'
+	implementation 'org.ow2.asm:asm:9.3'
+	implementation 'org.ow2.asm:asm-analysis:9.3'
+	implementation 'org.ow2.asm:asm-commons:9.3'
+	implementation 'org.ow2.asm:asm-tree:9.3'
+	implementation 'org.ow2.asm:asm-util:9.3'
+	implementation 'org.quiltmc:quilt-config:1.0.0-beta.6'
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+
+	withSourcesJar()
+}
+
+publishing {
+	publications {
+		java(MavenPublication) {
+			from components.java
+		}
+	}
+}
