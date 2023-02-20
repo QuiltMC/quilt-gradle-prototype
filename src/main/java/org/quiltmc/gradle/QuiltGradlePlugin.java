@@ -203,6 +203,7 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 				task.setClasspath(sourceSet.getRuntimeClasspath());
 				task.setWorkingDir(new File(project.getProjectDir(), "run"));
 				task.getMainClass().set("org.quiltmc.loader.impl.launch.knot.KnotClient");
+				task.args("loader.development=true");
 			});
 
 			registerTask(Constants.Tasks.RUN_SERVER, RunGameTask.class, sourceSet, task -> {

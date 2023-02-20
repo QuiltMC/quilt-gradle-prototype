@@ -35,6 +35,7 @@ public class Remapper {
                 atlas.install(ctx -> new JarEntryRemappingTransformer(new LorenzRemapper(mappings, ctx.inheritanceProvider())));
                 outFile.getParentFile().mkdirs();
                 atlas.run(inFile.toPath(), outFile.toPath());
+				atlas.close();
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
