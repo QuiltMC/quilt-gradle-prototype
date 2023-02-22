@@ -29,6 +29,7 @@ public final class Constants {
 
 	public static final class Configurations {
 		public static final String GAME = "game";
+		public static final String LOADER = "loader";
 		public static final String MAPPINGS = "mappings";
 		public static final String INTERMEDIATE = "intermediate";
 		public static final String VIA = "via";

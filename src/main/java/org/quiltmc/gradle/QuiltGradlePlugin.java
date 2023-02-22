@@ -126,6 +126,7 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 		// Setup configurations
 		Configuration gameConf = createConfiguration(Constants.Configurations.GAME, sourceSet);
 		Configuration remappedGameConf = createRemappedConfiguration(Constants.Configurations.GAME, sourceSet);
+		Configuration loaderConf = createConfiguration(Constants.Configurations.LOADER, sourceSet);
 		Configuration mappingsConf = createConfiguration(Constants.Configurations.MAPPINGS, sourceSet);
 		Configuration intermediateConf = createConfiguration(Constants.Configurations.INTERMEDIATE, sourceSet);
 		Configuration viaConf = createConfiguration(Constants.Configurations.VIA, sourceSet).extendsFrom(intermediateConf);
@@ -153,13 +154,17 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 			Configuration conf = createConfiguration(Constants.Configurations.MOD_PREFIX + capitalise(config.getValue()), sourceSet);
 			Configuration remappedConf = createRemappedConfiguration(Constants.Configurations.MOD_PREFIX + capitalise(config.getValue()), sourceSet);
 
+			if (config.getValue().equals(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)) {
+				conf.extendsFrom(loaderConf);
+			}
+
 			project.getConfigurations().getByName(config.getKey()).extendsFrom(remappedConf);
 
 			modConfigurations.put(conf, remappedConf);
 		}
 
 		project.getConfigurations().getByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, conf ->
-				conf.extendsFrom(remappedGameConf, loaderLibrariesConf, gameLibrariesConf)
+				conf.extendsFrom(remappedGameConf, gameLibrariesConf, loaderLibrariesConf)
 		);
 
 		// Setup after evaluation
@@ -170,10 +175,8 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 			mappingsProviders.put(sourceSet, mappingsProvider);
 
 			// Setup dependencies
-			if (sourceSet.getName().equals(SourceSet.MAIN_SOURCE_SET_NAME) && gameConf.getDependencies().isEmpty()) {
-				throw new IllegalStateException("No game dependency specified for the main source set.");
-			}
 			if (gameConf.getDependencies().size() > 1) throw new IllegalStateException("Multiple game dependencies specified for source set "+sourceSet.getName()+".");
+			if (loaderConf.getDependencies().size() > 1) throw new IllegalStateException("Multiple loader dependencies specified for source set "+sourceSet.getName()+".");
 
 			DependencySet mappingsDeps = mappingsConf.getDependencies();
 			if (mappingsDeps.size() > 1)  {
