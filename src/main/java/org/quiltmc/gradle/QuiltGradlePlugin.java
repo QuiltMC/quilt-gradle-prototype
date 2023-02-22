@@ -16,6 +16,7 @@
 
 package org.quiltmc.gradle;
 
+import com.grack.nanojson.JsonParserException;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
@@ -36,6 +37,7 @@ import org.gradle.plugins.ide.idea.IdeaPlugin;
 import org.quiltmc.gradle.task.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -190,6 +192,16 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 			}
 
 			mappingsProvider.setViaConf(viaConf);
+
+
+			// Setup extra libraries
+			// TODO: This should become a proper game-agnostic API
+			MinecraftProvider minecraftProvider = new MinecraftProvider(project, globalCache);
+			try {
+				minecraftProvider.provideLibraries(gameConf, gameLibrariesConf);
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to provide game libraries: " + e);
+			}
 
 
 			// Setup tasks

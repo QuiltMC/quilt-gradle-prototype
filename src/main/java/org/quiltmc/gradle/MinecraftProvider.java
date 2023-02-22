@@ -21,6 +21,7 @@ import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 
 import java.io.File;
@@ -31,6 +32,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
+import java.util.Optional;
 
 public class MinecraftProvider {
 	private final Project project;
@@ -74,14 +76,22 @@ public class MinecraftProvider {
 
 	}
 
-	public void provideLibraries(File localJson) throws FileNotFoundException, JsonParserException {
+	public void provideLibraries(Configuration gameConf, Configuration librariesConf) throws FileNotFoundException, JsonParserException {
+		// I hate this but it's a quick fix
+		Optional<Dependency> game = gameConf.getDependencies().stream().findFirst();
+		if (game.isEmpty()) {
+			return;
+		}
+
+		File localJson = globalCache.toPath().resolve(game.get().getVersion()).resolve("version.json").toFile();
+
 		JsonObject versionJson = JsonParser.object().from(new FileReader(localJson));
 		JsonArray libraries = versionJson.getArray("libraries");
 
 		for (Object obj : libraries) {
 			if (obj instanceof JsonObject jsonObj) {
 				if (Boolean.parseBoolean(evaluateRules(jsonObj))) {
-					project.getDependencies().add(Constants.Configurations.GAME_LIBRARIES, jsonObj.getString("name"));
+					project.getDependencies().add(librariesConf.getName(), jsonObj.getString("name"));
 				}
 			}
 		}
@@ -127,8 +137,6 @@ public class MinecraftProvider {
 			URL downloadUrl = new URL(download.getString("url"));
 			Files.copy(downloadUrl.openStream(), target.toPath());
 		}
-
-		provideLibraries(localJson);
 
 		return target;
 	}
