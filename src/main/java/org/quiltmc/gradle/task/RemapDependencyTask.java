@@ -57,17 +57,20 @@ public abstract class RemapDependencyTask extends DefaultTask {
 			for (ResolvedArtifact artifact : conf.getResolvedArtifacts()) {
 				ModuleVersionIdentifier dependency = artifact.getModuleVersion().getId();
 
-				String postfix = getMappingsProvider().getMappingsName().replace("-", "_");
+				String group = dependency.getGroup().replace(".", "/");
+				String name = dependency.getName() + "-" + dependency.getVersion();
+				String version = getMappingsProvider().getMappingsName().replace(":", "_").replace("-", "_");
 
 				File inputFile = artifact.getFile();
-				File outputFile = getDirectory().toPath().resolve(dependency.getName() + "-" + dependency.getVersion() + "+" + postfix + ".jar").toFile();
+				File outputFile = getDirectory().toPath().resolve(group).resolve(name).resolve(version).resolve(name + "-" + version + ".jar").toFile();
+				outputFile.getParentFile().mkdirs();
 
 				if (!outputFile.exists()) {
 					System.out.println("Remapping dependency " + inputFile.getName());
 					remapper.remap(inputFile, outputFile, getMappings(inputFile), false);
 				}
 
-				String notation = dependency.getGroup() + ":" + dependency.getName() + ":" + dependency.getVersion() + "+" + postfix;
+				String notation = dependency.getGroup() + ":" + name + ":" + version;
 				outputs.add(getProject().getDependencies().create(notation));
 			}
 

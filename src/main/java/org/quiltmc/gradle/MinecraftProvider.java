@@ -36,11 +36,11 @@ import java.util.Optional;
 
 public class MinecraftProvider {
 	private final Project project;
-	private final File globalCache;
+	private final File minecraftRepo;
 
-	public MinecraftProvider(Project project, File globalCache) {
+	public MinecraftProvider(Project project, File minecraftRepo) {
 		this.project = project;
-		this.globalCache = globalCache;
+		this.minecraftRepo = minecraftRepo;
 	}
 
 	 public Dependency downloadMinecraft(String version, String side) throws IOException, JsonParserException {
@@ -48,12 +48,6 @@ public class MinecraftProvider {
 
 		if (file == null) {
 			throw new RuntimeException("Failed to download Minecraft jar.");
-		}
-
-		File outputFile = globalCache.toPath().resolve(Constants.Locations.MINECRAFT_REPO).resolve(side + "-" + version + ".jar").toFile();
-
-		if (!outputFile.exists()) {
-			Files.copy(file.toPath(), outputFile.toPath());
 		}
 
 		return project.getDependencies().create("net.minecraft:" + side + ":" + version);
@@ -64,12 +58,6 @@ public class MinecraftProvider {
 
 		if (file == null) {
 			throw new RuntimeException("Failed to download Mojmap.");
-		}
-
-		File outputFile = globalCache.toPath().resolve("repo").resolve("mojmap-" + version + ".txt").toFile();
-
-		if (!outputFile.exists()) {
-			Files.copy(file.toPath(), outputFile.toPath());
 		}
 
 		return project.getDependencies().create("com.mojang:mojmap:" + version + "@txt");
@@ -83,7 +71,7 @@ public class MinecraftProvider {
 			return;
 		}
 
-		File localJson = globalCache.toPath().resolve(game.get().getVersion()).resolve("version.json").toFile();
+		File localJson = minecraftRepo.toPath().resolve(game.get().getVersion()).resolve("version.json").toFile();
 
 		JsonObject versionJson = JsonParser.object().from(new FileReader(localJson));
 		JsonArray libraries = versionJson.getArray("libraries");
@@ -98,7 +86,7 @@ public class MinecraftProvider {
 	}
 
 	private File download(String version, String artifact, String output) throws IOException, JsonParserException {
-		File dir = new File(globalCache, version);
+		File dir = new File(minecraftRepo, version);
 
 		if (!dir.exists()) {
 			dir.mkdirs();

@@ -59,7 +59,7 @@ public final class Constants {
 		 */
 		public static final String GLOBAL_CACHE = "caches/quilt-gradle";
 
-		public static final String REMAPPED_REPO = "remapped-repo";
-		public static final String MINECRAFT_REPO = "minecraft-repo";
+		public static final String REPO = "repo";
+		public static final String MINECRAFT = "minecraft";
 	}
 }

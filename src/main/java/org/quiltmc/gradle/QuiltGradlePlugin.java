@@ -23,6 +23,8 @@ import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencySet;
+import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaLibraryPlugin;
 import org.gradle.api.plugins.JavaPlugin;
@@ -36,7 +38,6 @@ import org.gradle.plugins.ide.idea.IdeaPlugin;
 import org.quiltmc.gradle.task.*;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,8 +45,9 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 	private Project project;
 	private File projectCache;
 	private File globalCache;
-	private File remappedRepo;
+	private File projectRepo;
 	private File globalRepo;
+	private File minecraftRepo;
 
 	public Map<SourceSet, MappingsProvider> mappingsProviders = new HashMap<>();
 
@@ -53,7 +55,7 @@ public class QuiltGradlePlugin implements Plugin<Project> {
     public void apply(Project project) {
 		this.project = project;
 
-		project.getLogger().lifecycle("Quilt Gradle v${version}");
+		project.getLogger().lifecycle("QuiltGradle v${version}");
 
 
 		// Apply default plugins
@@ -65,27 +67,33 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 		// Setup caches
 		projectCache = new File(project.getProjectDir(), Constants.Locations.PROJECT_CACHE);
 		globalCache = new File(project.getGradle().getGradleUserHomeDir(), Constants.Locations.GLOBAL_CACHE);
-		remappedRepo = new File(projectCache, Constants.Locations.REMAPPED_REPO);
-		globalRepo = new File(globalCache, Constants.Locations.MINECRAFT_REPO);
+		projectRepo = new File(projectCache, Constants.Locations.REPO);
+		globalRepo = new File(globalCache, Constants.Locations.REPO);
+		minecraftRepo = new File(globalCache, Constants.Locations.MINECRAFT);
 
-		if (!remappedRepo.exists()) {
-			remappedRepo.mkdirs();
-		}
-
-		if (!globalRepo.exists()) {
-			globalRepo.mkdirs();
-		}
+		projectRepo.mkdirs();
+		globalRepo.mkdirs();
+		minecraftRepo.mkdirs();
 
 
 		// Setup repositories
-		project.getRepositories().flatDir(repo -> {
-			repo.setName("Quilt Gradle: Remapped Dependencies");
-			repo.setDirs(Collections.singleton(remappedRepo));
+		project.getRepositories().maven(repo -> {
+			repo.setName("QuiltGradle: Project Cache");
+			repo.setUrl(projectRepo);
+			repo.metadataSources(MavenArtifactRepository.MetadataSources::artifact);
 		});
 
-		project.getRepositories().flatDir(repo -> {
-			repo.setName("Quilt Gradle: Global Cache");
-			repo.setDirs(Collections.singleton(globalRepo));
+		project.getRepositories().maven(repo -> {
+			repo.setName("QuiltGradle: Global Cache");
+			repo.setUrl(globalRepo);
+			repo.metadataSources(MavenArtifactRepository.MetadataSources::artifact);
+		});
+
+		project.getRepositories().ivy(repo -> {
+			repo.setName("QuiltGradle: Minecraft Cache");
+			repo.setUrl(minecraftRepo);
+			repo.patternLayout(layout -> layout.artifact("[revision]/[artifact].[ext]"));
+			repo.metadataSources(IvyArtifactRepository.MetadataSources::artifact);
 		});
 
 		project.getRepositories().maven(repo -> {
@@ -108,7 +116,7 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 
 
 		// Setup extensions
-		MinecraftProvider minecraftProvider = new MinecraftProvider(project, globalCache);
+		MinecraftProvider minecraftProvider = new MinecraftProvider(project, minecraftRepo);
         MinecraftExtension extension = project.getExtensions().create(Constants.Extensions.MINECRAFT, MinecraftExtension.class);
         extension.setProject(project);
 		extension.setMinecraftProvider(minecraftProvider);
@@ -197,7 +205,7 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 
 			// Provide extra libraries
 			// TODO: This should become a proper game-agnostic API
-			MinecraftProvider minecraftProvider = new MinecraftProvider(project, globalCache);
+			MinecraftProvider minecraftProvider = new MinecraftProvider(project, minecraftRepo);
 			try {
 				minecraftProvider.provideLibraries(gameConf, gameLibrariesConf);
 			} catch (Exception e) {
@@ -271,7 +279,7 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 				task.setGroup(Constants.TASK_GROUP);
 				task.setConfiguration(gameConf);
 				task.setMappingsProvider(mappingsProvider);
-				task.setDirectory(remappedRepo);
+				task.setDirectory(globalRepo);
 				task.dependsOn(gameConf);
 			});
 
@@ -284,7 +292,7 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 					task.setGroup(Constants.TASK_GROUP);
 					task.setConfiguration(entry.getKey());
 					task.setMappingsProvider(mappingsProvider);
-					task.setDirectory(remappedRepo);
+					task.setDirectory(globalRepo);
 					task.dependsOn(entry.getKey());
 				});
 
