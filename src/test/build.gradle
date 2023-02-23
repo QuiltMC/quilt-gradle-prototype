@@ -16,18 +16,6 @@ dependencies {
     loader 'org.quiltmc:quilt-loader:0.18.2'
 
 	modImplementation 'org.quiltmc:qsl:4.0.0-beta.11+1.19.3'
-
-	implementation 'net.fabricmc:tiny-mappings-parser:0.3.0+build.17'
-	implementation 'net.fabricmc:sponge-mixin:0.11.4+mixin.0.8.5'
-	implementation 'net.fabricmc:tiny-remapper:0.8.6'
-	implementation 'net.fabricmc:access-widener:2.1.0'
-	implementation 'org.quiltmc:quilt-json5:1.0.2'
-	implementation 'org.ow2.asm:asm:9.4'
-	implementation 'org.ow2.asm:asm-analysis:9.4'
-	implementation 'org.ow2.asm:asm-commons:9.4'
-	implementation 'org.ow2.asm:asm-tree:9.4'
-	implementation 'org.ow2.asm:asm-util:9.4'
-	implementation 'org.quiltmc:quilt-config:1.0.0-beta.6'
 }
 
 java {
