@@ -16,16 +16,19 @@
 
 package org.quiltmc.gradle;
 
+import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class QuiltLoaderHelper {
 	Project project;
@@ -41,12 +44,12 @@ public class QuiltLoaderHelper {
 
 		File loaderJar = loaderConf.getSingleFile();
 
-		var installer = FileSystems.newFileSystem(loaderJar.toPath()).getPath("quilt_installer.json");
-		var reader = Files.newBufferedReader(installer);
+		Path installer = FileSystems.newFileSystem(loaderJar.toPath()).getPath("quilt_installer.json");
+		BufferedReader reader = Files.newBufferedReader(installer);
 
-		var libraries = JsonParser.object().from(reader).getObject("libraries").getArray("common");
+		JsonArray libraries = JsonParser.object().from(reader).getObject("libraries").getArray("common");
 
-		for (var obj : libraries) {
+		for (Object obj : libraries) {
 			if (obj instanceof JsonObject jsonObj && jsonObj.containsKey("name")) {
 				project.getDependencies().add(librariesConf.getName(), jsonObj.getString("name"));
 			}

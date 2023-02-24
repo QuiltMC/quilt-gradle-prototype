@@ -16,6 +16,7 @@
 
 package org.quiltmc.gradle.task;
 
+import com.grack.nanojson.JsonParserException;
 import org.cadixdev.lorenz.MappingSet;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.*;
@@ -25,6 +26,7 @@ import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.OutputFiles;
 import org.quiltmc.gradle.MappingsProvider;
+import org.quiltmc.gradle.ModMetadataHelper;
 import org.quiltmc.gradle.Remapper;
 
 import java.io.File;
@@ -33,8 +35,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class RemapDependencyTask extends DefaultTask {
-	private static final String TEMP_MAPPINGS_COORDINATE = "net.fabricmc:intermediary";
-
 	@InputFiles
 	public abstract Configuration getConfiguration();
 	public abstract void setConfiguration(Configuration configuration);
@@ -66,7 +66,7 @@ public abstract class RemapDependencyTask extends DefaultTask {
 				outputFile.getParentFile().mkdirs();
 
 				if (!outputFile.exists()) {
-					System.out.println("Remapping dependency " + inputFile.getName());
+					getLogger().lifecycle("Remapping dependency " + inputFile.getName());
 					remapper.remap(inputFile, outputFile, getMappings(inputFile), false);
 				}
 
@@ -78,7 +78,7 @@ public abstract class RemapDependencyTask extends DefaultTask {
 		});
 	}
 
-	MappingSet getMappings(File jar) throws IOException {
-		return getMappingsProvider().getSourceMappingsVia(TEMP_MAPPINGS_COORDINATE);
+	MappingSet getMappings(File jar) throws IOException, JsonParserException {
+		return getMappingsProvider().getSourceMappingsVia(ModMetadataHelper.getMappings(jar));
 	}
 }
