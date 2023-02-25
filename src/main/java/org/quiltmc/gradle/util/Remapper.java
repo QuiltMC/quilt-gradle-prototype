@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.quiltmc.gradle;
+package org.quiltmc.gradle.util;
 
-import org.cadixdev.atlas.Atlas;
 import org.cadixdev.atlas.FixedAtlas;
 import org.cadixdev.bombe.jar.asm.JarEntryRemappingTransformer;
 import org.cadixdev.lorenz.MappingSet;
@@ -26,8 +25,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 
+@Deprecated
 public class Remapper {
-	private final FixedAtlas atlas = new FixedAtlas();;
+	private final FixedAtlas atlas = new FixedAtlas();
 
     public void remap(File inFile, File outFile, MappingSet mappings, boolean overwrite) {
         if (overwrite || !outFile.exists()) {

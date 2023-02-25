@@ -14,27 +14,24 @@
  * limitations under the License.
  */
 
-package org.quiltmc.gradle.task;
+package org.quiltmc.gradle.api;
 
-import org.gradle.api.tasks.JavaExec;
-import org.quiltmc.gradle.Constants;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.tasks.SourceSet;
 
 import java.io.File;
+import java.util.function.Consumer;
 
-public abstract class RunGameTask extends JavaExec {
-	public RunGameTask() {
-		super();
-		setGroup(Constants.TASK_GROUP);
-		setWorkingDir(new File(getProject().getProjectDir(), "run"));
-		systemProperty("loader.development", "true");
-	}
-
-	@Override
-	public void setWorkingDir(File dir) {
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
-
-		super.setWorkingDir(dir);
-	}
+public interface QuiltGradlePlugin {
+	/**
+	 * Registers a consumer to be run in every source set after evaluation.
+	 * @param action the consumer to run
+	 */
+	void registerPerSourceSet(Consumer<SourceSet> action);
+	Configuration getConfigurationPerSourceSet(String conf, SourceSet sourceSet);
+	String getNamePerSourceSet(String name, SourceSet sourceSet);
+	File getProjectCache();
+	File getGlobalCache();
+	File getProjectRepo();
+	File getGlobalRepo();
 }

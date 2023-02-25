@@ -20,13 +20,18 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.TaskAction;
-import org.quiltmc.gradle.MappingsProvider;
-import org.quiltmc.gradle.Remapper;
+import org.quiltmc.gradle.Constants;
+import org.quiltmc.gradle.util.MappingsProvider;
+import org.quiltmc.gradle.util.Remapper;
 
 import java.io.File;
 import java.io.IOException;
 
 public abstract class RemapJarTask extends DefaultTask {
+	public RemapJarTask() {
+		setGroup(Constants.TASK_GROUP);
+	}
+
 	@InputFile
 	public abstract File getJar();
 	public abstract void setJar(File jar);

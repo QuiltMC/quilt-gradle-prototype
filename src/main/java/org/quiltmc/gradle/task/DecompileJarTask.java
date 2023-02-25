@@ -21,10 +21,15 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.TaskAction;
 import org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler;
+import org.quiltmc.gradle.Constants;
 
 import java.io.File;
 
 public abstract class DecompileJarTask extends DefaultTask {
+	public DecompileJarTask() {
+		setGroup(Constants.TASK_GROUP);
+	}
+
 	@InputFiles
 	public abstract Configuration getConfiguration();
 	public abstract void setConfiguration(Configuration configuration);

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.quiltmc.gradle;
+package org.quiltmc.gradle.minecraft;
 
 import com.grack.nanojson.JsonParserException;
 import org.gradle.api.Project;
@@ -59,11 +59,11 @@ public class MinecraftExtension {
         return minecraftProvider.downloadMojmap(version);
     }
 
-	void setProject(Project project) {
+	public void setProject(Project project) {
         this.project = project;
     }
 
-	void setMinecraftProvider(MinecraftProvider minecraftProvider) {
+	public void setMinecraftProvider(MinecraftProvider minecraftProvider) {
 		this.minecraftProvider = minecraftProvider;
 	}
 }

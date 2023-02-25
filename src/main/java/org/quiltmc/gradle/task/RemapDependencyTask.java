@@ -25,9 +25,10 @@ import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.OutputFiles;
-import org.quiltmc.gradle.MappingsProvider;
-import org.quiltmc.gradle.ModMetadataHelper;
-import org.quiltmc.gradle.Remapper;
+import org.quiltmc.gradle.Constants;
+import org.quiltmc.gradle.util.MappingsProvider;
+import org.quiltmc.gradle.util.ModMetadataHelper;
+import org.quiltmc.gradle.util.Remapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,6 +36,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public abstract class RemapDependencyTask extends DefaultTask {
+	public RemapDependencyTask() {
+		setGroup(Constants.TASK_GROUP);
+	}
+
 	@InputFiles
 	public abstract Configuration getConfiguration();
 	public abstract void setConfiguration(Configuration configuration);

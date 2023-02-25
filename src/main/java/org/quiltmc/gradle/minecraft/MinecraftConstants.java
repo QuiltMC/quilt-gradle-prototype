@@ -14,27 +14,10 @@
  * limitations under the License.
  */
 
-package org.quiltmc.gradle.task;
+package org.quiltmc.gradle.minecraft;
 
-import org.gradle.api.tasks.JavaExec;
-import org.quiltmc.gradle.Constants;
-
-import java.io.File;
-
-public abstract class RunGameTask extends JavaExec {
-	public RunGameTask() {
-		super();
-		setGroup(Constants.TASK_GROUP);
-		setWorkingDir(new File(getProject().getProjectDir(), "run"));
-		systemProperty("loader.development", "true");
-	}
-
-	@Override
-	public void setWorkingDir(File dir) {
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
-
-		super.setWorkingDir(dir);
-	}
+public final class MinecraftConstants {
+	public static final String EXTENSION = "minecraft";
+	public static final String REPO = "minecraft";
+	public static final String VERSION_MANIFEST = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
 }

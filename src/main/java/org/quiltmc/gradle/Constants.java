@@ -19,23 +19,16 @@ package org.quiltmc.gradle;
 public final class Constants {
 	public static final String TASK_GROUP = "quilt";
 
-	public static final class Extensions {
-		public static final String MINECRAFT = "minecraft";
-	}
-
-	public static final class Minecraft {
-		public static final String VERSION_MANIFEST = "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json";
-	}
-
 	public static final class Configurations {
 		public static final String GAME = "game";
+		public static final String REMAPPED_GAME = "remappedGame";
 		public static final String LOADER = "loader";
 		public static final String MAPPINGS = "mappings";
 		public static final String INTERMEDIATE = "intermediate";
 		public static final String VIA = "via";
 
 		public static final String MOD_PREFIX = "mod";
-		public static final String REMAPPED_PREFIX = "remapped";
+		public static final String REMAPPED_MOD_PREFIX = "remappedMod";
 
 		public static final String GAME_LIBRARIES = "gameLibraries";
 		public static final String LOADER_LIBRARIES = "loaderLibraries"; // Temporary until loader declares dependencies in it's POM
@@ -60,6 +53,5 @@ public final class Constants {
 		public static final String GLOBAL_CACHE = "caches/quilt-gradle";
 
 		public static final String REPO = "repo";
-		public static final String MINECRAFT = "minecraft";
 	}
 }

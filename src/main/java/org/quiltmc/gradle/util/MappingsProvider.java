@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.quiltmc.gradle;
+package org.quiltmc.gradle.util;
 
 import net.fabricmc.lorenztiny.TinyMappingsReader;
 import net.fabricmc.mappingio.MappingReader;

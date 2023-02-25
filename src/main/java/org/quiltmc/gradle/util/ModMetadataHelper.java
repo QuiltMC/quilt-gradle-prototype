@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.quiltmc.gradle;
+package org.quiltmc.gradle.util;
 
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
@@ -28,6 +28,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 
 public class ModMetadataHelper {
+	// Temporary until we do full metadata parsing
 	public static String getMappings(File jar) throws IOException, JsonParserException {
 		FileSystem jarFs = FileSystems.newFileSystem(jar.toPath());
 

@@ -66,9 +66,13 @@ blossom {
 gradlePlugin {
     plugins {
         quilt_gradle {
-            id = 'org.quiltmc.gradle'
-            implementationClass = 'org.quiltmc.gradle.QuiltGradlePlugin'
+            id = 'org.quiltmc.gradle.base'
+            implementationClass = 'org.quiltmc.gradle.impl.QuiltGradlePluginImpl'
         }
+		quilt_minecraft {
+			id = 'org.quiltmc.gradle.minecraft'
+			implementationClass = 'org.quiltmc.gradle.minecraft.MinecraftPlugin'
+		}
     }
 }
 

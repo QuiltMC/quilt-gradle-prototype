@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.quiltmc.gradle;
+package org.quiltmc.gradle.minecraft;
 
 import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
@@ -94,7 +94,7 @@ public class MinecraftProvider {
 
 		File target = new File(dir, output);
 
-		JsonObject manifest = JsonParser.object().from(new URL(Constants.Minecraft.VERSION_MANIFEST));
+		JsonObject manifest = JsonParser.object().from(new URL(MinecraftConstants.VERSION_MANIFEST));
 		JsonArray versions = manifest.getArray("versions");
 		String versionUrl = null;
 

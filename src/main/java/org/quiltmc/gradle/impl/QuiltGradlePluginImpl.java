@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.quiltmc.gradle;
+package org.quiltmc.gradle.impl;
 
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
@@ -23,7 +23,6 @@ import org.gradle.api.Task;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencySet;
-import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaLibraryPlugin;
@@ -35,21 +34,27 @@ import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.gradle.plugins.ide.eclipse.EclipsePlugin;
 import org.gradle.plugins.ide.idea.IdeaPlugin;
+import org.quiltmc.gradle.Constants;
+import org.quiltmc.gradle.util.MappingsProvider;
+import org.quiltmc.gradle.util.QuiltLoaderHelper;
+import org.quiltmc.gradle.api.QuiltGradlePlugin;
 import org.quiltmc.gradle.task.*;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
 
-public class QuiltGradlePlugin implements Plugin<Project> {
+public class QuiltGradlePluginImpl implements QuiltGradlePlugin, Plugin<Project> {
 	private Project project;
 	private File projectCache;
 	private File globalCache;
 	private File projectRepo;
 	private File globalRepo;
-	private File minecraftRepo;
 
-	public Map<SourceSet, MappingsProvider> mappingsProviders = new HashMap<>();
+	public final Map<SourceSet, MappingsProvider> mappingsProviders = new HashMap<>();
 
 	@Override
     public void apply(Project project) {
@@ -57,23 +62,19 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 
 		project.getLogger().lifecycle("QuiltGradle v${version}");
 
-
 		// Apply default plugins
         project.getPlugins().apply(JavaLibraryPlugin.class);
         project.getPlugins().apply(IdeaPlugin.class);
         project.getPlugins().apply(EclipsePlugin.class);
-
 
 		// Setup caches
 		projectCache = new File(project.getProjectDir(), Constants.Locations.PROJECT_CACHE);
 		globalCache = new File(project.getGradle().getGradleUserHomeDir(), Constants.Locations.GLOBAL_CACHE);
 		projectRepo = new File(projectCache, Constants.Locations.REPO);
 		globalRepo = new File(globalCache, Constants.Locations.REPO);
-		minecraftRepo = new File(globalCache, Constants.Locations.MINECRAFT);
 
 		projectRepo.mkdirs();
 		globalRepo.mkdirs();
-		minecraftRepo.mkdirs();
 
 
 		// Setup repositories
@@ -89,49 +90,39 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 			repo.metadataSources(MavenArtifactRepository.MetadataSources::artifact);
 		});
 
-		project.getRepositories().ivy(repo -> {
-			repo.setName("QuiltGradle: Minecraft Cache");
-			repo.setUrl(minecraftRepo);
-			repo.patternLayout(layout -> layout.artifact("[revision]/[artifact].[ext]"));
-			repo.metadataSources(IvyArtifactRepository.MetadataSources::artifact);
-		});
-
 		project.getRepositories().maven(repo -> {
 			repo.setName("Quilt");
 			repo.setUrl("https://maven.quiltmc.org/repository/release");
 		});
 
-		// Required for first-party intermediary support
 		project.getRepositories().maven(repo -> {
 			repo.setName("Fabric");
 			repo.setUrl("https://maven.fabricmc.net");
 		});
 
-		project.getRepositories().maven(repo -> {
-			repo.setName("Mojang Libraries");
-			repo.setUrl("https://libraries.minecraft.net");
-		});
-
 		project.getRepositories().mavenCentral();
 
 
-		// Setup extensions
-		MinecraftProvider minecraftProvider = new MinecraftProvider(project, minecraftRepo);
-        MinecraftExtension extension = project.getExtensions().create(Constants.Extensions.MINECRAFT, MinecraftExtension.class);
-        extension.setProject(project);
-		extension.setMinecraftProvider(minecraftProvider);
+		// Run source set configuration
+		registerPerSourceSet(this::setupSourceSet);
+	}
 
-
-		// Setup per source set
+	@Override
+	public void registerPerSourceSet(Consumer<SourceSet> action) {
+		// Run consumers per source set
 		SourceSetContainer sourceSets = project.getExtensions().getByType(JavaPluginExtension.class).getSourceSets();
-		sourceSets.forEach(this::setupSourceSet);
-		sourceSets.whenObjectAdded(this::setupSourceSet);
+		sourceSets.forEach(action);
+		sourceSets.whenObjectAdded(action::accept);
+	}
+
+	public Configuration getConfigurationPerSourceSet(String conf, SourceSet sourceSet) {
+		return project.getConfigurations().getByName(getNamePerSourceSet(conf, sourceSet));
 	}
 
 	private void setupSourceSet(SourceSet sourceSet) {
 		// Setup configurations
 		Configuration gameConf = createConfiguration(Constants.Configurations.GAME, sourceSet);
-		Configuration remappedGameConf = createRemappedConfiguration(Constants.Configurations.GAME, sourceSet);
+		Configuration remappedGameConf = createConfiguration(Constants.Configurations.REMAPPED_GAME, sourceSet);
 		Configuration loaderConf = createConfiguration(Constants.Configurations.LOADER, sourceSet);
 		Configuration mappingsConf = createConfiguration(Constants.Configurations.MAPPINGS, sourceSet);
 		Configuration intermediateConf = createConfiguration(Constants.Configurations.INTERMEDIATE, sourceSet);
@@ -158,7 +149,7 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 			}
 
 			Configuration conf = createConfiguration(Constants.Configurations.MOD_PREFIX + capitalise(config.getValue()), sourceSet);
-			Configuration remappedConf = createRemappedConfiguration(Constants.Configurations.MOD_PREFIX + capitalise(config.getValue()), sourceSet);
+			Configuration remappedConf = createConfiguration(Constants.Configurations.REMAPPED_MOD_PREFIX + capitalise(config.getValue()), sourceSet);
 
 			if (config.getValue().equals(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME)) {
 				conf.extendsFrom(loaderConf);
@@ -204,14 +195,6 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 
 
 			// Provide extra libraries
-			// TODO: This should become a proper game-agnostic API
-			MinecraftProvider minecraftProvider = new MinecraftProvider(project, minecraftRepo);
-			try {
-				minecraftProvider.provideLibraries(gameConf, gameLibrariesConf);
-			} catch (Exception e) {
-				throw new RuntimeException("Failed to provide game libraries", e);
-			}
-
 			// TODO: Temporary until loader includes these libraries in its POM
 			QuiltLoaderHelper loaderHelper = new QuiltLoaderHelper(project);
 			try {
@@ -223,24 +206,17 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 
 			// Setup tasks
 			registerTask(Constants.Tasks.DECOMPILE, DecompileJarTask.class, sourceSet, task -> {
-				task.setGroup(Constants.TASK_GROUP);
 				task.setConfiguration(gameConf);
 			});
 
 			registerTask(Constants.Tasks.RUN_CLIENT, RunGameTask.class, sourceSet, task -> {
-				task.setGroup(Constants.TASK_GROUP);
 				task.setClasspath(sourceSet.getRuntimeClasspath());
-				task.setWorkingDir(new File(project.getProjectDir(), "run"));
 				task.getMainClass().set("org.quiltmc.loader.impl.launch.knot.KnotClient");
-				task.systemProperty("loader.development", "true");
 			});
 
 			registerTask(Constants.Tasks.RUN_SERVER, RunGameTask.class, sourceSet, task -> {
-				task.setGroup(Constants.TASK_GROUP);
 				task.setClasspath(sourceSet.getRuntimeClasspath());
-				task.setWorkingDir(new File(project.getProjectDir(), "run"));
 				task.getMainClass().set("org.quiltmc.loader.impl.launch.knot.KnotServer");
-				task.systemProperty("loader.development", "true");
 			});
 
 			if (!supportsRemapping) {
@@ -250,7 +226,6 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 
 			if (project.getTasks().stream().anyMatch(task -> task.getName().equals(sourceSet.getJarTaskName()))) {
 				TaskProvider<RemapJarTask> remapJarTask = registerRemapTask(sourceSet.getJarTaskName(), RemapJarTask.class, task -> {
-					task.setGroup(Constants.TASK_GROUP);
 					task.setJar(project.getTasks().named(sourceSet.getJarTaskName(), AbstractArchiveTask.class).get().getArchiveFile().get().getAsFile());
 					task.setMappingsProvider(mappingsProvider);
 					task.dependsOn(sourceSet.getJarTaskName());
@@ -263,7 +238,6 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 
 			if (project.getTasks().stream().anyMatch(task -> task.getName().equals(sourceSet.getSourcesJarTaskName()))) {
 				TaskProvider<RemapSourcesJarTask> remapSourcesJarTask = registerRemapTask(sourceSet.getSourcesJarTaskName(), RemapSourcesJarTask.class, task -> {
-					task.setGroup(Constants.TASK_GROUP);
 					task.setJar(project.getTasks().named(sourceSet.getSourcesJarTaskName(), AbstractArchiveTask.class).get().getArchiveFile().get().getAsFile());
 					task.setMappingsProvider(mappingsProvider);
 					task.dependsOn(sourceSet.getSourcesJarTaskName());
@@ -276,7 +250,6 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 
 			// Dependency remapping tasks
 			TaskProvider<RemapGameTask> remapGameTask = registerRemapTask(Constants.Configurations.GAME, RemapGameTask.class, sourceSet, task -> {
-				task.setGroup(Constants.TASK_GROUP);
 				task.setConfiguration(gameConf);
 				task.setMappingsProvider(mappingsProvider);
 				task.setDirectory(globalRepo);
@@ -289,7 +262,6 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 
 			for (Map.Entry<Configuration, Configuration> entry : modConfigurations.entrySet()) {
 				TaskProvider<RemapDependencyTask> remapTask = registerRemapTask(entry.getKey().getName(), RemapDependencyTask.class, task -> {
-					task.setGroup(Constants.TASK_GROUP);
 					task.setConfiguration(entry.getKey());
 					task.setMappingsProvider(mappingsProvider);
 					task.setDirectory(globalRepo);
@@ -303,28 +275,37 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 		});
 	}
 
+	@Override
+	public File getProjectCache() {
+		return projectCache;
+	}
+
+	@Override
+	public File getGlobalCache() {
+		return globalCache;
+	}
+
+	@Override
+	public File getProjectRepo() {
+		return projectRepo;
+	}
+
+	@Override
+	public File getGlobalRepo() {
+		return globalRepo;
+	}
+
+	@Override
+	public String getNamePerSourceSet(String name, SourceSet sourceSet) {
+		return sourceSet.getName().equals(SourceSet.MAIN_SOURCE_SET_NAME) ? name : sourceSet.getName() + capitalise(name);
+	}
+
 	private Configuration createConfiguration(String name) {
 		return project.getConfigurations().create(name);
 	}
 
 	private Configuration createConfiguration(String name, SourceSet sourceSet) {
-		if (sourceSet.getName().equals(SourceSet.MAIN_SOURCE_SET_NAME)) {
-			return createConfiguration(name);
-		} else {
-			return createConfiguration(sourceSet.getName() + capitalise(name));
-		}
-	}
-
-	private Configuration createRemappedConfiguration(String name) {
-		return createConfiguration(Constants.Configurations.REMAPPED_PREFIX + capitalise(name));
-	}
-
-	private Configuration createRemappedConfiguration(String name, SourceSet sourceSet) {
-		if (sourceSet.getName().equals(SourceSet.MAIN_SOURCE_SET_NAME)) {
-			return createRemappedConfiguration(name);
-		} else {
-			return createRemappedConfiguration(sourceSet.getName() + capitalise(name));
-		}
+		return createConfiguration(getNamePerSourceSet(name, sourceSet));
 	}
 
 	private <T extends Task> TaskProvider<T> registerTask(String name, Class<T> clazz, Action<? super T> action) {
@@ -332,11 +313,7 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 	}
 
 	private <T extends Task> TaskProvider<T> registerTask(String name, Class<T> clazz, SourceSet sourceSet, Action<? super T> action) {
-		if (sourceSet.getName().equals(SourceSet.MAIN_SOURCE_SET_NAME)) {
-			return registerTask(name, clazz, action);
-		} else {
-			return registerTask(sourceSet.getName() + capitalise(name), clazz, action);
-		}
+		return registerTask(getNamePerSourceSet(name, sourceSet), clazz, action);
 	}
 
 	private <T extends Task> TaskProvider<T> registerRemapTask(String name, Class<T> clazz, Action<? super T> action) {
@@ -344,11 +321,8 @@ public class QuiltGradlePlugin implements Plugin<Project> {
 	}
 
 	private <T extends Task> TaskProvider<T> registerRemapTask(String name, Class<T> clazz, SourceSet sourceSet, Action<? super T> action) {
-		if (sourceSet.getName().equals(SourceSet.MAIN_SOURCE_SET_NAME)) {
-			return registerRemapTask(name, clazz, action);
-		} else {
-			return registerRemapTask(sourceSet.getName() + capitalise(name), clazz, action);
-		}
+		return registerRemapTask(getNamePerSourceSet(name, sourceSet), clazz, action);
+
 	}
 
 	private static String capitalise(String str) {

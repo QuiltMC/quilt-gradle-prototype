@@ -1,5 +1,5 @@
 plugins {
-    id 'org.quiltmc.gradle' version '0.1.0-SNAPSHOT'
+    id 'org.quiltmc.gradle.minecraft' version '0.1.0-SNAPSHOT'
 	id 'maven-publish'
 }
 
