@@ -16,13 +16,19 @@
 
 package org.quiltmc.gradle.api;
 
+import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.tasks.SourceSet;
+import org.quiltmc.gradle.impl.QuiltGradlePluginImpl;
 
 import java.io.File;
 import java.util.function.Consumer;
 
 public interface QuiltGradlePlugin {
+	static QuiltGradlePlugin get(Project project) {
+		return project.getPlugins().getPlugin(QuiltGradlePluginImpl.class);
+	}
+
 	/**
 	 * Registers a consumer to be run in every source set after evaluation.
 	 * @param action the consumer to run
