@@ -6,11 +6,11 @@ pluginManagement {
         }
         maven {
             name = 'Fabric'
-            url = 'https://maven.fabricmc.net/'
+            url = 'https://maven.fabricmc.net'
         }
         maven {
             name 'Maven Central Snapshots'
-            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+            url 'https://oss.sonatype.org/content/repositories/snapshots'
         }
         gradlePluginPortal()
         mavenLocal()

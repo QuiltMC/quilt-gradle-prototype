@@ -17,7 +17,7 @@ dependencies {
 
     loader 'org.quiltmc:quilt-loader:0.18.2'
 
-    modImplementation 'org.quiltmc:qsl:4.0.0-beta.3+1.19.3'
+    modImplementation 'org.quiltmc:qsl:4.0.0-beta.11+1.19.3'
 }
 
 ```
