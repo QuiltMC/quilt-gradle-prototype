@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.quiltmc.gradle.impl;
+package org.quiltmc.gradle;
 
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
@@ -27,15 +27,12 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaLibraryPlugin;
 import org.gradle.api.plugins.JavaPlugin;
-import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.SourceSet;
-import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.gradle.plugins.ide.eclipse.EclipsePlugin;
 import org.gradle.plugins.ide.idea.IdeaPlugin;
-import org.quiltmc.gradle.Constants;
-import org.quiltmc.gradle.api.QuiltGradlePlugin;
+import org.quiltmc.gradle.impl.QuiltGradleApiImpl;
 import org.quiltmc.gradle.task.*;
 import org.quiltmc.gradle.util.MappingsProvider;
 import org.quiltmc.gradle.util.QuiltLoaderHelper;
@@ -43,16 +40,11 @@ import org.quiltmc.gradle.util.QuiltLoaderHelper;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
-public class QuiltGradlePluginImpl implements QuiltGradlePlugin, Plugin<Project> {
-	private Project project;
-	private File projectCache;
-	private File globalCache;
-	private File projectRepo;
-	private File globalRepo;
-
-	public final Map<SourceSet, MappingsProvider> mappingsProviders = new HashMap<>();
+public class QuiltGradlePlugin extends QuiltGradleApiImpl implements Plugin<Project> {
+	public static QuiltGradlePlugin get(Project project) {
+		return project.getPlugins().getPlugin(QuiltGradlePlugin.class);
+	}
 
 	@Override
     public void apply(Project project) {
@@ -107,18 +99,6 @@ public class QuiltGradlePluginImpl implements QuiltGradlePlugin, Plugin<Project>
 		registerPerSourceSet(this::setupSourceSet);
 	}
 
-	@Override
-	public void registerPerSourceSet(Consumer<SourceSet> action) {
-		// Run consumers per source set
-		SourceSetContainer sourceSets = project.getExtensions().getByType(JavaPluginExtension.class).getSourceSets();
-		sourceSets.forEach(action);
-		sourceSets.whenObjectAdded(action::accept);
-	}
-
-	public Configuration getConfigurationPerSourceSet(String conf, SourceSet sourceSet) {
-		return project.getConfigurations().getByName(getNamePerSourceSet(conf, sourceSet));
-	}
-
 	private void setupSourceSet(SourceSet sourceSet) {
 		// Setup configurations
 		Configuration gameConf = createConfiguration(Constants.Configurations.GAME, sourceSet);
@@ -168,10 +148,7 @@ public class QuiltGradlePluginImpl implements QuiltGradlePlugin, Plugin<Project>
 		// Setup after evaluation
 		project.afterEvaluate(action -> {
 			boolean supportsRemapping = false;
-
 			MappingsProvider mappingsProvider = new MappingsProvider();
-			mappingsProviders.put(sourceSet, mappingsProvider);
-
 
 			// Setup dependencies
 			if (gameConf.getDependencies().size() > 1) throw new IllegalStateException("Multiple game dependencies specified for source set "+sourceSet.getName()+".");
@@ -275,26 +252,6 @@ public class QuiltGradlePluginImpl implements QuiltGradlePlugin, Plugin<Project>
 				}
 			}
 		});
-	}
-
-	@Override
-	public File getProjectCache() {
-		return projectCache;
-	}
-
-	@Override
-	public File getGlobalCache() {
-		return globalCache;
-	}
-
-	@Override
-	public File getProjectRepo() {
-		return projectRepo;
-	}
-
-	@Override
-	public File getGlobalRepo() {
-		return globalRepo;
 	}
 
 	@Override

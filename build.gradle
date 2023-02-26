@@ -6,7 +6,7 @@ plugins {
 }
 
 group 'org.quiltmc.gradle'
-version '0.1.0'
+version '0.1.' + System.getenv().getOrDefault('BUILD_NUMBER', 'local')
 
 repositories {
 	mavenCentral()
@@ -67,7 +67,7 @@ gradlePlugin {
     plugins {
         quilt_gradle {
             id = 'org.quiltmc.gradle.base'
-            implementationClass = 'org.quiltmc.gradle.impl.QuiltGradlePluginImpl'
+            implementationClass = 'org.quiltmc.gradle.QuiltGradlePlugin'
         }
 		quilt_minecraft {
 			id = 'org.quiltmc.gradle.minecraft'
@@ -77,12 +77,6 @@ gradlePlugin {
 }
 
 publishing {
-	publications {
-		plugin(MavenPublication) {
-			from components.java
-		}
-	}
-
 	repositories {
 		maven {
 			url = System.getenv('MAVEN_URL')

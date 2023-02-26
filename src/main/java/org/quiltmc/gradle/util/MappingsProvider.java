@@ -21,6 +21,7 @@ import net.fabricmc.mappingio.MappingReader;
 import net.fabricmc.mappingio.tree.MemoryMappingTree;
 import org.cadixdev.lorenz.MappingSet;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.ResolvedArtifact;
 
 import java.io.*;
 import java.math.BigInteger;
@@ -70,7 +71,7 @@ public class MappingsProvider {
 	}
 
 	private void loadViaMappings() throws IOException {
-		for (var artifact : viaConf.getResolvedConfiguration().getResolvedArtifacts()) {
+		for (ResolvedArtifact artifact : viaConf.getResolvedConfiguration().getResolvedArtifacts()) {
 			String coordinate = removeVersion(artifact.getId().getComponentIdentifier().getDisplayName());
 			if (!viaMappings.containsKey(coordinate)) {
 				viaMappings.put(coordinate, readMappings(artifact.getFile()));
@@ -110,8 +111,7 @@ public class MappingsProvider {
 	public MappingSet getViaMappings(String coordinate, MappingSet baseMappings, boolean reverse) throws IOException {
 		loadViaMappings();
 
-		if (reverse) return baseMappings.reverse().merge(getViaMappings(coordinate));
-		else return baseMappings.merge(getViaMappings(coordinate));
+		return reverse ? baseMappings.reverse().merge(getViaMappings(coordinate)) : baseMappings.merge(getViaMappings(coordinate));
 	}
 
 	public MappingSet getSourceMappingsVia(String coordinate) throws IOException {
