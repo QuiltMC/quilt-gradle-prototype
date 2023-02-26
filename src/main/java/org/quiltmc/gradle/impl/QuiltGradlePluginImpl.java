@@ -35,16 +35,14 @@ import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.gradle.plugins.ide.eclipse.EclipsePlugin;
 import org.gradle.plugins.ide.idea.IdeaPlugin;
 import org.quiltmc.gradle.Constants;
-import org.quiltmc.gradle.util.MappingsProvider;
-import org.quiltmc.gradle.util.QuiltLoaderHelper;
 import org.quiltmc.gradle.api.QuiltGradlePlugin;
 import org.quiltmc.gradle.task.*;
+import org.quiltmc.gradle.util.MappingsProvider;
+import org.quiltmc.gradle.util.QuiltLoaderHelper;
 
 import java.io.File;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 
 public class QuiltGradlePluginImpl implements QuiltGradlePlugin, Plugin<Project> {
@@ -62,10 +60,12 @@ public class QuiltGradlePluginImpl implements QuiltGradlePlugin, Plugin<Project>
 
 		project.getLogger().lifecycle("QuiltGradle v${version}");
 
+
 		// Apply default plugins
         project.getPlugins().apply(JavaLibraryPlugin.class);
         project.getPlugins().apply(IdeaPlugin.class);
         project.getPlugins().apply(EclipsePlugin.class);
+
 
 		// Setup caches
 		projectCache = new File(project.getProjectDir(), Constants.Locations.PROJECT_CACHE);
@@ -164,12 +164,14 @@ public class QuiltGradlePluginImpl implements QuiltGradlePlugin, Plugin<Project>
 				conf.extendsFrom(remappedGameConf, gameLibrariesConf, loaderLibrariesConf)
 		);
 
+
 		// Setup after evaluation
 		project.afterEvaluate(action -> {
 			boolean supportsRemapping = false;
 
 			MappingsProvider mappingsProvider = new MappingsProvider();
 			mappingsProviders.put(sourceSet, mappingsProvider);
+
 
 			// Setup dependencies
 			if (gameConf.getDependencies().size() > 1) throw new IllegalStateException("Multiple game dependencies specified for source set "+sourceSet.getName()+".");

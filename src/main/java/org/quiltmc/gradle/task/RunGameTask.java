@@ -24,8 +24,9 @@ import java.io.File;
 public abstract class RunGameTask extends JavaExec {
 	public RunGameTask() {
 		super();
+
 		setGroup(Constants.TASK_GROUP);
-		setWorkingDir(new File(getProject().getProjectDir(), "run"));
+		setWorkingDir(new File(getProject().getProjectDir(), Constants.Locations.RUN_DIRECTORY));
 		systemProperty("loader.development", "true");
 	}
 

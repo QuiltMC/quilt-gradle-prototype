@@ -53,5 +53,6 @@ public final class Constants {
 		public static final String GLOBAL_CACHE = "caches/quilt-gradle";
 
 		public static final String REPO = "repo";
+		public static final String RUN_DIRECTORY = "run";
 	}
 }

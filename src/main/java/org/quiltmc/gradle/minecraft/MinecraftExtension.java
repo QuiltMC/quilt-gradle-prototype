@@ -17,14 +17,12 @@
 package org.quiltmc.gradle.minecraft;
 
 import com.grack.nanojson.JsonParserException;
-import org.gradle.api.Project;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.provider.Provider;
 
 import java.io.IOException;
 
 public class MinecraftExtension {
-    private Project project;
 	private MinecraftProvider minecraftProvider;
 
 	public Dependency merged(Provider<String> version) {
@@ -57,10 +55,6 @@ public class MinecraftExtension {
 
     public Dependency mojmap(String version) throws IOException, JsonParserException {
         return minecraftProvider.downloadMojmap(version);
-    }
-
-	public void setProject(Project project) {
-        this.project = project;
     }
 
 	public void setMinecraftProvider(MinecraftProvider minecraftProvider) {

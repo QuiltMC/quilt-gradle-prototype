@@ -87,10 +87,7 @@ public class MinecraftProvider {
 
 	private File download(String version, String artifact, String output) throws IOException, JsonParserException {
 		File dir = new File(minecraftRepo, version);
-
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
+		dir.mkdirs();
 
 		File target = new File(dir, output);
 

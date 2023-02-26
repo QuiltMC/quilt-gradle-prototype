@@ -34,6 +34,7 @@ public class MinecraftPlugin implements Plugin<Project> {
 
 		QuiltGradlePlugin quiltGradle = QuiltGradlePlugin.get(project);
 
+
 		// Setup repos
 		File minecraftRepo = new File(quiltGradle.getGlobalCache(), MinecraftConstants.REPO);
 		minecraftRepo.mkdirs();
@@ -54,7 +55,6 @@ public class MinecraftPlugin implements Plugin<Project> {
 		// Setup extensions
 		MinecraftProvider minecraftProvider = new MinecraftProvider(project, minecraftRepo);
 		MinecraftExtension extension = project.getExtensions().create(MinecraftConstants.EXTENSION, MinecraftExtension.class);
-		extension.setProject(project);
 		extension.setMinecraftProvider(minecraftProvider);
 
 
