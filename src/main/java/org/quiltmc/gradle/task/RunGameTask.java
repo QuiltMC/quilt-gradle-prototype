@@ -32,10 +32,7 @@ public abstract class RunGameTask extends JavaExec {
 
 	@Override
 	public void setWorkingDir(File dir) {
-		if (!dir.exists()) {
-			dir.mkdirs();
-		}
-
+		dir.mkdirs();
 		super.setWorkingDir(dir);
 	}
 }

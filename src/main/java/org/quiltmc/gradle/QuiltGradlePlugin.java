@@ -173,7 +173,6 @@ public class QuiltGradlePlugin extends QuiltGradleApiImpl implements Plugin<Proj
 			mappingsProvider.setViaConf(viaConf);
 
 
-			// Provide extra libraries
 			// TODO: Temporary until loader includes these libraries in its POM
 			QuiltLoaderHelper loaderHelper = new QuiltLoaderHelper(project);
 			try {
@@ -254,11 +253,6 @@ public class QuiltGradlePlugin extends QuiltGradleApiImpl implements Plugin<Proj
 		});
 	}
 
-	@Override
-	public String getNamePerSourceSet(String name, SourceSet sourceSet) {
-		return sourceSet.getName().equals(SourceSet.MAIN_SOURCE_SET_NAME) ? name : sourceSet.getName() + capitalise(name);
-	}
-
 	private Configuration createConfiguration(String name) {
 		return project.getConfigurations().create(name);
 	}
@@ -282,6 +276,10 @@ public class QuiltGradlePlugin extends QuiltGradleApiImpl implements Plugin<Proj
 	private <T extends Task> TaskProvider<T> registerRemapTask(String name, Class<T> clazz, SourceSet sourceSet, Action<? super T> action) {
 		return registerRemapTask(getNamePerSourceSet(name, sourceSet), clazz, action);
 
+	}
+
+	public static String getNamePerSourceSet(String name, SourceSet sourceSet) {
+		return sourceSet.getName().equals(SourceSet.MAIN_SOURCE_SET_NAME) ? name : sourceSet.getName() + capitalise(name);
 	}
 
 	private static String capitalise(String str) {

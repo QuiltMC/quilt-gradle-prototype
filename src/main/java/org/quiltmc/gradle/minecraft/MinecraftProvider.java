@@ -20,14 +20,12 @@ import com.grack.nanojson.JsonArray;
 import com.grack.nanojson.JsonObject;
 import com.grack.nanojson.JsonParser;
 import com.grack.nanojson.JsonParserException;
+import net.fabricmc.stitch.merge.JarMerger;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -43,23 +41,25 @@ public class MinecraftProvider {
 		this.minecraftRepo = minecraftRepo;
 	}
 
-	 public Dependency downloadMinecraft(String version, String side) throws IOException, JsonParserException {
-		File file = download(version, side, side + ".jar");
-
-		if (file == null) {
-			throw new RuntimeException("Failed to download Minecraft jar.");
-		}
-
+	 public Dependency provideMinecraft(String version, String side) throws IOException, JsonParserException {
+		download(version, side, side + ".jar");
 		return project.getDependencies().create("net.minecraft:" + side + ":" + version);
 	}
 
-	public Dependency downloadMojmap(String version) throws IOException, JsonParserException {
-		File file = download(version, "client_mappings", "mojmap.txt");
+	public Dependency provideMerged(String version) throws IOException, JsonParserException {
+		File client = download(version, "client", "client.jar");
+		File server = download(version, "server", "server.jar");
+		File merged = new File(client.getParentFile(), "merged.jar");
 
-		if (file == null) {
-			throw new RuntimeException("Failed to download Mojmap.");
+		if (!merged.exists()) {
+			mergeJars(client, server, merged);
 		}
 
+		return project.getDependencies().create("net.minecraft:merged:" + version);
+	}
+
+	public Dependency provideMojmap(String version) throws IOException, JsonParserException {
+		download(version, "client_mappings", "mojmap.txt");
 		return project.getDependencies().create("com.mojang:mojmap:" + version + "@txt");
 
 	}
@@ -82,6 +82,15 @@ public class MinecraftProvider {
 					project.getDependencies().add(librariesConf.getName(), jsonObj.getString("name"));
 				}
 			}
+		}
+	}
+
+	private void mergeJars(File client, File server, File merged) {
+		try(JarMerger merger = new JarMerger(client, server, merged)) {
+			project.getLogger().lifecycle("QuildGradle: Merging Minecraft jars");
+			merger.merge();
+		} catch (IOException e) {
+			throw new UncheckedIOException("Failed to merge Minecraft jars.", e);
 		}
 	}
 
@@ -121,6 +130,10 @@ public class MinecraftProvider {
 		if (!target.exists()) {
 			URL downloadUrl = new URL(download.getString("url"));
 			Files.copy(downloadUrl.openStream(), target.toPath());
+		}
+
+		if (!target.exists()) {
+			throw new RuntimeException("Failed to download " + artifact);
 		}
 
 		return target;

@@ -23,15 +23,15 @@ import java.io.File;
 import java.util.function.Consumer;
 
 public interface QuiltGradleApi {
+	File getProjectCache();
+	File getGlobalCache();
+	File getProjectRepo();
+	File getGlobalRepo();
+
 	/**
 	 * Registers a consumer to be run in every source set after evaluation.
 	 * @param action the consumer to run
 	 */
 	void registerPerSourceSet(Consumer<SourceSet> action);
 	Configuration getConfigurationPerSourceSet(String conf, SourceSet sourceSet);
-	String getNamePerSourceSet(String name, SourceSet sourceSet);
-	File getProjectCache();
-	File getGlobalCache();
-	File getProjectRepo();
-	File getGlobalRepo();
 }

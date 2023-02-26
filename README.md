@@ -9,7 +9,7 @@ group = 'org.example'
 version = '0.1.0-SNAPSHOT'
 
 dependencies {
-    game minecraft.client('1.19.3')
+    game minecraft.merged('1.19.3')
 
     intermediate 'org.quiltmc:hashed:1.19.3'
     mappings 'org.quiltmc:quilt-mappings:1.19.3+build.23'

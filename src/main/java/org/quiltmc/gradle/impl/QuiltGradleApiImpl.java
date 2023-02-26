@@ -21,6 +21,7 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.SourceSet;
 import org.gradle.api.tasks.SourceSetContainer;
+import org.quiltmc.gradle.QuiltGradlePlugin;
 import org.quiltmc.gradle.api.QuiltGradleApi;
 
 import java.io.File;
@@ -63,6 +64,6 @@ public abstract class QuiltGradleApiImpl implements QuiltGradleApi {
 
 	@Override
 	public Configuration getConfigurationPerSourceSet(String conf, SourceSet sourceSet) {
-		return project.getConfigurations().getByName(getNamePerSourceSet(conf, sourceSet));
+		return project.getConfigurations().getByName(QuiltGradlePlugin.getNamePerSourceSet(conf, sourceSet));
 	}
 }

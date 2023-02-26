@@ -25,12 +25,12 @@ import java.io.IOException;
 public class MinecraftExtension {
 	private MinecraftProvider minecraftProvider;
 
-	public Dependency merged(Provider<String> version) {
+	public Dependency merged(Provider<String> version) throws JsonParserException, IOException {
 		return merged(version.get());
 	}
 
-    public Dependency merged(String version) {
-        throw new RuntimeException("TODO: Not yet implemented");
+    public Dependency merged(String version) throws JsonParserException, IOException {
+        return minecraftProvider.provideMerged(version);
     }
 
 	public Dependency client(Provider<String> version) throws IOException, JsonParserException {
@@ -38,7 +38,7 @@ public class MinecraftExtension {
 	}
 
     public Dependency client(String version) throws IOException, JsonParserException {
-        return minecraftProvider.downloadMinecraft(version, "client");
+        return minecraftProvider.provideMinecraft(version, "client");
     }
 
 	public Dependency server(Provider<String> version) throws IOException, JsonParserException {
@@ -46,7 +46,7 @@ public class MinecraftExtension {
 	}
 
     public Dependency server(String version) throws IOException, JsonParserException {
-		return minecraftProvider.downloadMinecraft(version, "server");
+		return minecraftProvider.provideMinecraft(version, "server");
     }
 
 	public Dependency mojmap(Provider<String> version) throws IOException, JsonParserException {
@@ -54,7 +54,7 @@ public class MinecraftExtension {
 	}
 
     public Dependency mojmap(String version) throws IOException, JsonParserException {
-        return minecraftProvider.downloadMojmap(version);
+        return minecraftProvider.provideMojmap(version);
     }
 
 	public void setMinecraftProvider(MinecraftProvider minecraftProvider) {

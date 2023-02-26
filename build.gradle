@@ -37,6 +37,7 @@ dependencies {
     implementation 'net.fabricmc:lorenz-tiny:4.0.2'
 
     implementation 'net.fabricmc:tiny-mappings-parser:0.3.0+build.17'
+	implementation 'net.fabricmc:stitch:0.6.2'
 
     implementation 'org.cadixdev:atlas:0.3.0-SNAPSHOT'
 
