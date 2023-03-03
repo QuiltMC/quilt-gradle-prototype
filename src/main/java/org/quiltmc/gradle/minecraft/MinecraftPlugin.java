@@ -22,6 +22,7 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository;
 import org.quiltmc.gradle.Constants;
 import org.quiltmc.gradle.QuiltGradlePlugin;
+import org.quiltmc.gradle.api.QuiltGradleExtension;
 
 import java.io.File;
 
@@ -31,11 +32,11 @@ public class MinecraftPlugin implements Plugin<Project> {
 		project.getPlugins().apply(QuiltGradlePlugin.class);
 		project.getLogger().lifecycle("QuiltGradle: Setting up Minecraft plugin");
 
-		QuiltGradlePlugin quiltGradle = QuiltGradlePlugin.get(project);
+		QuiltGradleExtension quiltGradle = QuiltGradleExtension.get(project);
 
 
 		// Setup repos
-		File minecraftRepo = new File(quiltGradle.getGlobalCache(), MinecraftConstants.REPO);
+		File minecraftRepo = new File(quiltGradle.getGlobalCache().get().getAsFile(), MinecraftConstants.REPO);
 		minecraftRepo.mkdirs();
 
 		project.getRepositories().ivy(repo -> {

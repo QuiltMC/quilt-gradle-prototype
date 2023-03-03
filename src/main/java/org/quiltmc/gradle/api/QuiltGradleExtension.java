@@ -16,17 +16,22 @@
 
 package org.quiltmc.gradle.api;
 
+import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.tasks.SourceSet;
 
-import java.io.File;
 import java.util.function.Consumer;
 
-public interface QuiltGradleApi {
-	File getProjectCache();
-	File getGlobalCache();
-	File getProjectRepo();
-	File getGlobalRepo();
+public interface QuiltGradleExtension {
+	static QuiltGradleExtension get(Project project) {
+		return project.getExtensions().getByType(QuiltGradleExtension.class);
+	}
+
+	DirectoryProperty getProjectCache();
+	DirectoryProperty getGlobalCache();
+	DirectoryProperty getProjectRepo();
+	DirectoryProperty getGlobalRepo();
 
 	/**
 	 * Registers a consumer to be run in every source set after evaluation.

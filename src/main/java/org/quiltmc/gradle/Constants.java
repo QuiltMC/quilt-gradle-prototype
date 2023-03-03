@@ -18,6 +18,7 @@ package org.quiltmc.gradle;
 
 public final class Constants {
 	public static final String TASK_GROUP = "quilt";
+	public static final String EXTENSION = "quilt";
 
 	public static final class Configurations {
 		public static final String GAME = "game";

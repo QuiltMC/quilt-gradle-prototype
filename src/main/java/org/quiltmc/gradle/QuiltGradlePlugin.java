@@ -27,12 +27,15 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository;
 import org.gradle.api.plugins.BasePlugin;
 import org.gradle.api.plugins.JavaLibraryPlugin;
 import org.gradle.api.plugins.JavaPlugin;
+import org.gradle.api.plugins.JavaPluginExtension;
 import org.gradle.api.tasks.SourceSet;
+import org.gradle.api.tasks.SourceSetContainer;
 import org.gradle.api.tasks.TaskProvider;
 import org.gradle.api.tasks.bundling.AbstractArchiveTask;
 import org.gradle.plugins.ide.eclipse.EclipsePlugin;
 import org.gradle.plugins.ide.idea.IdeaPlugin;
-import org.quiltmc.gradle.impl.QuiltGradleApiImpl;
+import org.quiltmc.gradle.api.QuiltGradleExtension;
+import org.quiltmc.gradle.impl.QuiltGradleExtensionImpl;
 import org.quiltmc.gradle.task.*;
 import org.quiltmc.gradle.util.MappingsProvider;
 import org.quiltmc.gradle.util.QuiltLoaderHelper;
@@ -40,11 +43,14 @@ import org.quiltmc.gradle.util.QuiltLoaderHelper;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
-public class QuiltGradlePlugin extends QuiltGradleApiImpl implements Plugin<Project> {
-	public static QuiltGradlePlugin get(Project project) {
-		return project.getPlugins().getPlugin(QuiltGradlePlugin.class);
-	}
+public class QuiltGradlePlugin implements Plugin<Project> {
+	private Project project;
+	public File projectCache;
+	public File globalCache;
+	public File projectRepo;
+	public File globalRepo;
 
 	@Override
     public void apply(Project project) {
@@ -59,11 +65,15 @@ public class QuiltGradlePlugin extends QuiltGradleApiImpl implements Plugin<Proj
         project.getPlugins().apply(EclipsePlugin.class);
 
 
+		// Setup extension
+		QuiltGradleExtension extension = project.getExtensions().create(Constants.EXTENSION, QuiltGradleExtensionImpl.class, project, this);
+
+
 		// Setup caches
-		projectCache = new File(project.getProjectDir(), Constants.Locations.PROJECT_CACHE);
-		globalCache = new File(project.getGradle().getGradleUserHomeDir(), Constants.Locations.GLOBAL_CACHE);
-		projectRepo = new File(projectCache, Constants.Locations.REPO);
-		globalRepo = new File(globalCache, Constants.Locations.REPO);
+		projectCache = extension.getProjectCache().get().getAsFile();
+		globalCache = extension.getGlobalCache().get().getAsFile();
+		projectRepo = extension.getProjectRepo().get().getAsFile();
+		globalRepo = extension.getGlobalRepo().get().getAsFile();
 
 		projectRepo.mkdirs();
 		globalRepo.mkdirs();
@@ -251,6 +261,17 @@ public class QuiltGradlePlugin extends QuiltGradleApiImpl implements Plugin<Proj
 				}
 			}
 		});
+	}
+
+	public void registerPerSourceSet(Consumer<SourceSet> action) {
+		// Run consumers per source set
+		SourceSetContainer sourceSets = project.getExtensions().getByType(JavaPluginExtension.class).getSourceSets();
+		sourceSets.forEach(action);
+		sourceSets.whenObjectAdded(action::accept);
+	}
+
+	public Configuration getConfigurationPerSourceSet(String conf, SourceSet sourceSet) {
+		return project.getConfigurations().getByName(QuiltGradlePlugin.getNamePerSourceSet(conf, sourceSet));
 	}
 
 	private Configuration createConfiguration(String name) {

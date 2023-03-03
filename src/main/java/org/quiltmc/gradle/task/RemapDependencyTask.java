@@ -20,6 +20,7 @@ import com.grack.nanojson.JsonParserException;
 import org.cadixdev.lorenz.MappingSet;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.*;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
@@ -49,7 +50,7 @@ public abstract class RemapDependencyTask extends DefaultTask {
 	public abstract Property<MappingsProvider> getMappingsProvider();
 
 	@OutputDirectory
-	public abstract RegularFileProperty getDirectory();
+	public abstract DirectoryProperty getDirectory();
 
 	@OutputFiles
 	public Provider<Set<Dependency>> getOutputDependencies() {
