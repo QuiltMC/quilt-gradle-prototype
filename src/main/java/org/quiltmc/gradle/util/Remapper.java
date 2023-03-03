@@ -20,7 +20,6 @@ import net.fabricmc.tinyremapper.IMappingProvider;
 import net.fabricmc.tinyremapper.OutputConsumerPath;
 import net.fabricmc.tinyremapper.TinyRemapper;
 import net.fabricmc.tinyremapper.TinyRemapperConfiguration;
-import net.fabricmc.tinyremapper.extension.mixin.MixinExtension;
 import org.cadixdev.lorenz.MappingSet;
 import org.cadixdev.lorenz.model.*;
 
@@ -51,7 +50,6 @@ public class Remapper {
 							true,
 							Pattern.compile("\\$\\$\\d+|c_[a-z]{8}"),
 							true))
-					.extension(new MixinExtension())
 					.build();
 
 			try (OutputConsumerPath outputConsumer = new OutputConsumerPath.Builder(outFile.toPath()).build()) {
