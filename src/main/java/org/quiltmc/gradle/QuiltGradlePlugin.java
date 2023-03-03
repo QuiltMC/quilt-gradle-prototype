@@ -184,7 +184,7 @@ public class QuiltGradlePlugin extends QuiltGradleApiImpl implements Plugin<Proj
 
 			// Setup tasks
 			registerTask(Constants.Tasks.DECOMPILE, DecompileJarTask.class, sourceSet, task -> {
-				task.setConfiguration(gameConf);
+				task.getConfiguration().set(gameConf);
 			});
 
 			registerTask(Constants.Tasks.RUN_CLIENT, RunGameTask.class, sourceSet, task -> {
@@ -204,8 +204,8 @@ public class QuiltGradlePlugin extends QuiltGradleApiImpl implements Plugin<Proj
 
 			if (project.getTasks().stream().anyMatch(task -> task.getName().equals(sourceSet.getJarTaskName()))) {
 				TaskProvider<RemapJarTask> remapJarTask = registerRemapTask(sourceSet.getJarTaskName(), RemapJarTask.class, task -> {
-					task.setJar(project.getTasks().named(sourceSet.getJarTaskName(), AbstractArchiveTask.class).get().getArchiveFile().get().getAsFile());
-					task.setMappingsProvider(mappingsProvider);
+					task.getJar().set(project.getTasks().named(sourceSet.getJarTaskName(), AbstractArchiveTask.class).get().getArchiveFile().get().getAsFile());
+					task.getMappingsProvider().set(mappingsProvider);
 					task.dependsOn(sourceSet.getJarTaskName());
 				});
 
@@ -216,8 +216,8 @@ public class QuiltGradlePlugin extends QuiltGradleApiImpl implements Plugin<Proj
 
 			if (project.getTasks().stream().anyMatch(task -> task.getName().equals(sourceSet.getSourcesJarTaskName()))) {
 				TaskProvider<RemapSourcesJarTask> remapSourcesJarTask = registerRemapTask(sourceSet.getSourcesJarTaskName(), RemapSourcesJarTask.class, task -> {
-					task.setJar(project.getTasks().named(sourceSet.getSourcesJarTaskName(), AbstractArchiveTask.class).get().getArchiveFile().get().getAsFile());
-					task.setMappingsProvider(mappingsProvider);
+					task.getJar().set(project.getTasks().named(sourceSet.getSourcesJarTaskName(), AbstractArchiveTask.class).get().getArchiveFile().get().getAsFile());
+					task.getMappingsProvider().set(mappingsProvider);
 					task.dependsOn(sourceSet.getSourcesJarTaskName());
 				});
 
@@ -228,9 +228,9 @@ public class QuiltGradlePlugin extends QuiltGradleApiImpl implements Plugin<Proj
 
 			// Dependency remapping tasks
 			TaskProvider<RemapGameTask> remapGameTask = registerRemapTask(Constants.Configurations.GAME, RemapGameTask.class, sourceSet, task -> {
-				task.setConfiguration(gameConf);
-				task.setMappingsProvider(mappingsProvider);
-				task.setDirectory(globalRepo);
+				task.getConfiguration().set(gameConf);
+				task.getMappingsProvider().set(mappingsProvider);
+				task.getDirectory().set(globalRepo);
 				task.dependsOn(gameConf);
 			});
 
@@ -240,9 +240,9 @@ public class QuiltGradlePlugin extends QuiltGradleApiImpl implements Plugin<Proj
 
 			for (Map.Entry<Configuration, Configuration> entry : modConfigurations.entrySet()) {
 				TaskProvider<RemapDependencyTask> remapTask = registerRemapTask(entry.getKey().getName(), RemapDependencyTask.class, task -> {
-					task.setConfiguration(entry.getKey());
-					task.setMappingsProvider(mappingsProvider);
-					task.setDirectory(globalRepo);
+					task.getConfiguration().set(entry.getKey());
+					task.getMappingsProvider().set(mappingsProvider);
+					task.getDirectory().set(globalRepo);
 					task.dependsOn(entry.getKey());
 				});
 

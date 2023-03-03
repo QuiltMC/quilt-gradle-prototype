@@ -18,6 +18,7 @@ package org.quiltmc.gradle.task;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.TaskAction;
 import org.jetbrains.java.decompiler.main.decompiler.ConsoleDecompiler;
@@ -31,12 +32,11 @@ public abstract class DecompileJarTask extends DefaultTask {
 	}
 
 	@InputFiles
-	public abstract Configuration getConfiguration();
-	public abstract void setConfiguration(Configuration configuration);
+	public abstract Property<Configuration> getConfiguration();
 
 	@TaskAction
 	public void execute() {
-		File jar = getConfiguration().getSingleFile();
+		File jar = getConfiguration().get().getSingleFile();
 		File sources = new File(jar.getParentFile(), jar.getName().replaceFirst(".jar$", "-sources.jar"));
 		ConsoleDecompiler.main(new String[]{"-log=ERROR",  "-ind=\t", jar.getAbsolutePath(), sources.getAbsolutePath()});
 	}

@@ -24,6 +24,6 @@ import java.io.IOException;
 public abstract class RemapGameTask extends RemapDependencyTask {
 	@Override
 	MappingSet getMappings(File jar) throws IOException {
-		return getMappingsProvider().getMergedMappings();
+		return getMappingsProvider().get().getMergedMappings();
 	}
 }

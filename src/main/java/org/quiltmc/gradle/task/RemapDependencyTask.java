@@ -20,6 +20,8 @@ import com.grack.nanojson.JsonParserException;
 import org.cadixdev.lorenz.MappingSet;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.artifacts.*;
+import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
@@ -41,21 +43,18 @@ public abstract class RemapDependencyTask extends DefaultTask {
 	}
 
 	@InputFiles
-	public abstract Configuration getConfiguration();
-	public abstract void setConfiguration(Configuration configuration);
+	public abstract Property<Configuration> getConfiguration();
 
 	@Input
-	public abstract MappingsProvider getMappingsProvider();
-	public abstract void setMappingsProvider(MappingsProvider mappingsProvider);
+	public abstract Property<MappingsProvider> getMappingsProvider();
 
 	@OutputDirectory
-	public abstract File getDirectory();
-	public abstract void setDirectory(File directory);
+	public abstract RegularFileProperty getDirectory();
 
 	@OutputFiles
 	public Provider<Set<Dependency>> getOutputDependencies() {
 		return this.getProject().provider(() -> {
-			ResolvedConfiguration conf = getConfiguration().getResolvedConfiguration();
+			ResolvedConfiguration conf = getConfiguration().get().getResolvedConfiguration();
 			Set<Dependency> outputs = new HashSet<>();
 			Remapper remapper = new Remapper();
 
@@ -64,10 +63,10 @@ public abstract class RemapDependencyTask extends DefaultTask {
 
 				String group = dependency.getGroup().replace(".", "/");
 				String name = dependency.getName() + "-" + dependency.getVersion();
-				String version = getMappingsProvider().getMappingsName().replace(":", "_").replace("-", "_");
+				String version = getMappingsProvider().get().getMappingsName().replace(":", "_").replace("-", "_");
 
 				File inputFile = artifact.getFile();
-				File outputFile = getDirectory().toPath().resolve(group).resolve(name).resolve(version).resolve(name + "-" + version + ".jar").toFile();
+				File outputFile = getDirectory().get().getAsFile().toPath().resolve(group).resolve(name).resolve(version).resolve(name + "-" + version + ".jar").toFile();
 				outputFile.getParentFile().mkdirs();
 
 				if (!outputFile.exists()) {
@@ -84,6 +83,6 @@ public abstract class RemapDependencyTask extends DefaultTask {
 	}
 
 	MappingSet getMappings(File jar) throws IOException, JsonParserException {
-		return getMappingsProvider().getSourceMappingsVia(ModMetadataHelper.getMappings(jar));
+		return getMappingsProvider().get().getSourceMappingsVia(ModMetadataHelper.getMappings(jar));
 	}
 }

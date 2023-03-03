@@ -17,13 +17,13 @@
 package org.quiltmc.gradle.task;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.file.RegularFileProperty;
+import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.quiltmc.gradle.Constants;
 import org.quiltmc.gradle.util.MappingsProvider;
-
-import java.io.File;
 
 public abstract class RemapSourcesJarTask extends DefaultTask {
 	public RemapSourcesJarTask() {
@@ -31,12 +31,10 @@ public abstract class RemapSourcesJarTask extends DefaultTask {
 	}
 
 	@InputFile
-	public abstract File getJar();
-	public abstract void setJar(File jar);
+	public abstract RegularFileProperty getJar();
 
 	@Input
-	public abstract MappingsProvider getMappingsProvider();
-	public abstract void setMappingsProvider(MappingsProvider mappingsProvider);
+	public abstract Property<MappingsProvider> getMappingsProvider();
 
 	@TaskAction
 	public void execute() {
