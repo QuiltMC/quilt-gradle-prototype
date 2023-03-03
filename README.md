@@ -15,7 +15,7 @@ dependencies {
     mappings 'org.quiltmc:quilt-mappings:1.19.3+build.23'
     via 'net.fabricmc:intermediary:1.19.3:v2'
 
-    loader 'org.quiltmc:quilt-loader:0.18.2'
+    loader 'org.quiltmc:quilt-loader:0.18.3'
 
     modImplementation 'org.quiltmc:qsl:4.0.0-beta.11+1.19.3'
 }

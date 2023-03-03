@@ -16,29 +16,86 @@
 
 package org.quiltmc.gradle.util;
 
-import org.cadixdev.atlas.FixedAtlas;
-import org.cadixdev.bombe.jar.asm.JarEntryRemappingTransformer;
+import net.fabricmc.tinyremapper.IMappingProvider;
+import net.fabricmc.tinyremapper.OutputConsumerPath;
+import net.fabricmc.tinyremapper.TinyRemapper;
+import net.fabricmc.tinyremapper.TinyRemapperConfiguration;
+import net.fabricmc.tinyremapper.extension.mixin.MixinExtension;
 import org.cadixdev.lorenz.MappingSet;
-import org.cadixdev.lorenz.asm.LorenzRemapper;
+import org.cadixdev.lorenz.model.*;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.util.Map;
+import java.util.regex.Pattern;
 
-@Deprecated
 public class Remapper {
-	private final FixedAtlas atlas = new FixedAtlas();
+	private static final Map<String, String> JAVAX_TO_JETBRAINS = Map.of(
+			"javax/annotation/Nullable", "org/jetbrains/annotations/Nullable",
+			"javax/annotation/Nonnull", "org/jetbrains/annotations/NotNull",
+			"javax/annotation/concurrent/Immutable", "org/jetbrains/annotations/Unmodifiable"
+	);
 
     public void remap(File inFile, File outFile, MappingSet mappings, boolean overwrite) {
         if (overwrite || !outFile.exists()) {
-            try {
-                atlas.install(ctx -> new JarEntryRemappingTransformer(new LorenzRemapper(mappings, ctx.inheritanceProvider())));
-                outFile.getParentFile().mkdirs();
-                atlas.run(inFile.toPath(), outFile.toPath());
-				atlas.close();
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        }
+			TinyRemapper remapper = TinyRemapper.newRemapper()
+					.withMappings(createProvider(mappings))
+					.withMappings(out -> JAVAX_TO_JETBRAINS.forEach(out::acceptClass))
+					.configuration(new TinyRemapperConfiguration(
+							false,
+							true,
+							false,
+							false,
+							false,
+							true,
+							false,
+							true,
+							Pattern.compile("\\$\\$\\d+|c_[a-z]{8}"),
+							true))
+					.extension(new MixinExtension())
+					.build();
+
+			try (OutputConsumerPath outputConsumer = new OutputConsumerPath.Builder(outFile.toPath()).build()) {
+				outputConsumer.addNonClassFiles(inFile.toPath());
+				remapper.readInputs(inFile.toPath());
+				remapper.apply(outputConsumer);
+			} catch (Exception e) {
+				throw new RuntimeException("Failed to remap jar", e);
+			} finally {
+				remapper.finish();
+			}
+		}
     }
+
+	private static IMappingProvider createProvider(MappingSet mappings) {
+		return acceptor -> {
+			for (TopLevelClassMapping classDef : mappings.getTopLevelClassMappings()) {
+				createProviderPerClass(classDef, acceptor);
+			}
+		};
+	}
+
+	private static <T extends ClassMapping<?, ?>> void createProviderPerClass(T classDef, IMappingProvider.MappingAcceptor acceptor) {
+		String className = classDef.getFullObfuscatedName();
+		String dstName = classDef.getFullDeobfuscatedName();
+
+		acceptor.acceptClass(className, dstName);
+
+		for (InnerClassMapping innerClass : classDef.getInnerClassMappings()) {
+			createProviderPerClass(innerClass, acceptor);
+		}
+
+		for (FieldMapping field : classDef.getFieldMappings()) {
+			acceptor.acceptField(new IMappingProvider.Member(className, field.getObfuscatedName(), field.getType().orElseThrow().toString()), field.getDeobfuscatedName());
+		}
+
+		for (MethodMapping method : classDef.getMethodMappings()) {
+			IMappingProvider.Member methodIdentifier = new IMappingProvider.Member(className, method.getObfuscatedName(), method.getObfuscatedDescriptor());
+			acceptor.acceptMethod(methodIdentifier, method.getDeobfuscatedName());
+
+			for (MethodParameterMapping parameter : method.getParameterMappings()) {
+				String name = parameter.getDeobfuscatedName();
+				acceptor.acceptMethodArg(methodIdentifier, parameter.getIndex(), name);
+			}
+		}
+	}
 }
