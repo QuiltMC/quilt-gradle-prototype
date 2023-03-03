@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "quilt_loader": {
+    "group": "org.quiltmc.gradle",
+    "id": "test",
+    "version": "$version",
+    "metadata": {
+      "name": "QuiltGradle Test",
+      "description": "A test mod for QuiltGradle"
+    },
+    "intermediate_mappings": "net.fabricmc:intermediary",
+    "depends": [
+      {
+        "id": "quilt_loader",
+        "versions": ">=0.17.6-"
+      },
+      {
+        "id": "minecraft",
+        "versions": ">=1.19.3"
+      }
+    ]
+  }
+}

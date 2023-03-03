@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+// TODO: This should all move to QMT
 public class MappingsProvider {
 	private static final byte[] ZIP_HEADER = new BigInteger("504B0304",16).toByteArray();
 	private static final byte[] TINY_HEADER = "tiny\t2\t0".getBytes();
@@ -121,7 +122,6 @@ public class MappingsProvider {
 		return getViaMappings(coordinate).reverse().merge(getMergedMappings());
 	}
 
-	// TODO: When moving to QMT, we probably just need to reverse sourceMappings
 	public MappingSet getTargetMappings() throws IOException {
 		loadSourceMappings();
 		loadIntermediateMappings();

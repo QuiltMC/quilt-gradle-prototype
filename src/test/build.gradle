@@ -15,7 +15,15 @@ dependencies {
 
     loader 'org.quiltmc:quilt-loader:0.18.3'
 
-	modImplementation 'org.quiltmc:qsl:4.0.0-beta.12+1.19.3'
+//	modImplementation 'org.quiltmc:qsl:4.0.0-beta.12+1.19.3'
+}
+
+processResources {
+	inputs.property 'version', version
+
+	filesMatching('quilt.mod.json') {
+		expand 'version': version
+	}
 }
 
 java {
