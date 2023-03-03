@@ -2,11 +2,11 @@
 
 ```groovy
 plugins {
-    id 'org.quiltmc.gradle' version '0.1.0'
+    id 'org.quiltmc.gradle.minecraft' version '0.1.0'
 }
 
 group = 'org.example'
-version = '0.1.0-SNAPSHOT'
+version = '0.1.0'
 
 dependencies {
     game minecraft.merged('1.19.3')
