@@ -54,8 +54,7 @@ public class MinecraftPlugin implements Plugin<Project> {
 
 		// Setup extensions
 		MinecraftProvider minecraftProvider = new MinecraftProvider(project, minecraftRepo);
-		MinecraftExtension extension = project.getExtensions().create(MinecraftConstants.EXTENSION, MinecraftExtension.class);
-		extension.setMinecraftProvider(minecraftProvider);
+		project.getExtensions().create(MinecraftConstants.EXTENSION, MinecraftExtension.class, minecraftProvider);
 
 
 		// Setup functions to run in every source set

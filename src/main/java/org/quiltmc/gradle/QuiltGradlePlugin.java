@@ -65,7 +65,7 @@ public class QuiltGradlePlugin implements Plugin<Project> {
         project.getPlugins().apply(EclipsePlugin.class);
 
 
-		// Setup extension
+		// Setup extensions
 		QuiltGradleExtension extension = project.getExtensions().create(Constants.EXTENSION, QuiltGradleExtensionImpl.class, project, this);
 
 

@@ -23,7 +23,11 @@ import org.gradle.api.provider.Provider;
 import java.io.IOException;
 
 public class MinecraftExtension {
-	private MinecraftProvider minecraftProvider;
+	private final MinecraftProvider minecraftProvider;
+
+	public MinecraftExtension(MinecraftProvider minecraftProvider) {
+		this.minecraftProvider = minecraftProvider;
+	}
 
 	public Dependency merged(Provider<String> version) throws JsonParserException, IOException {
 		return merged(version.get());
@@ -56,8 +60,4 @@ public class MinecraftExtension {
     public Dependency mojmap(String version) throws IOException, JsonParserException {
         return minecraftProvider.provideMojmap(version);
     }
-
-	public void setMinecraftProvider(MinecraftProvider minecraftProvider) {
-		this.minecraftProvider = minecraftProvider;
-	}
 }
