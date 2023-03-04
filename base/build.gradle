@@ -1,0 +1,28 @@
+apply plugin: 'net.kyori.blossom'
+
+group 'org.quiltmc.gradle.base'
+
+dependencies {
+	implementation 'com.grack:nanojson:1.8'
+
+	implementation 'org.cadixdev:lorenz:0.5.8'
+	implementation 'net.fabricmc:lorenz-tiny:4.0.2'
+
+	implementation 'org.quiltmc:tiny-remapper:0.7.2'
+
+	implementation 'org.quiltmc:quilt-json5:1.0.3'
+	implementation 'org.quiltmc:quiltflower:1.9.0'
+}
+
+blossom {
+	replaceToken('${version}', version)
+}
+
+gradlePlugin {
+	plugins {
+		quilt_gradle {
+			id = 'org.quiltmc.gradle.base'
+			implementationClass = 'org.quiltmc.gradle.base.QuiltGradlePlugin'
+		}
+	}
+}

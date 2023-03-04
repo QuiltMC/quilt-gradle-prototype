@@ -11,3 +11,5 @@ pluginManagement {
 }
 
 rootProject.name = 'quilt-gradle'
+
+include 'base', 'minecraft'

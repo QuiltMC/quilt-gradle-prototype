@@ -1,0 +1,17 @@
+group 'org.quiltmc.gradle.minecraft'
+
+dependencies {
+	api project(':base')
+
+	implementation 'com.grack:nanojson:1.8'
+	implementation 'net.fabricmc:stitch:0.6.2'
+}
+
+gradlePlugin {
+	plugins {
+		quilt_minecraft {
+			id = 'org.quiltmc.gradle.minecraft'
+			implementationClass = 'org.quiltmc.gradle.minecraft.MinecraftPlugin'
+		}
+	}
+}

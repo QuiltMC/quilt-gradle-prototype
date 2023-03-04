@@ -1,77 +1,49 @@
 plugins {
-    id'java-gradle-plugin'
-    id 'maven-publish'
-	id 'org.quiltmc.gradle.licenser' version '1.1.+'
-	id 'net.kyori.blossom' version '1.3.+'
+	id 'org.quiltmc.gradle.licenser' version '1.1.+' apply false
+	id 'net.kyori.blossom' version '1.3.+' apply false
 }
 
-group 'org.quiltmc.gradle'
-version '0.1.' + System.getenv().getOrDefault('BUILD_NUMBER', 'local')
+subprojects {
+	apply plugin: 'java-gradle-plugin'
+	apply plugin: 'maven-publish'
+	apply plugin: 'org.quiltmc.gradle.licenser'
 
-repositories {
-	mavenCentral()
+	version '0.1.' + System.getenv().getOrDefault('BUILD_NUMBER', 'local')
 
-	maven {
-        name 'Quilt'
-        url 'https://maven.quiltmc.org/repository/release'
-    }
-	maven {
-		name 'Fabric'
-		url 'https://maven.fabricmc.net'
+	repositories {
+		mavenCentral()
+
+		maven {
+			name 'Quilt'
+			url 'https://maven.quiltmc.org/repository/release'
+		}
+		maven {
+			name 'Fabric'
+			url 'https://maven.fabricmc.net'
+		}
 	}
-}
 
-dependencies {
-    implementation 'com.grack:nanojson:1.8'
+	license {
+		rule file("${rootDir}/codeformat/HEADER")
 
-	implementation 'org.cadixdev:lorenz:0.5.8'
-	implementation 'net.fabricmc:lorenz-tiny:4.0.2'
+		include '**/*.java'
+	}
 
-	implementation 'org.quiltmc:tiny-remapper:0.7.2'
-	implementation 'net.fabricmc:stitch:0.6.2'
-
-	implementation 'org.quiltmc:quilt-json5:1.0.3'
-    implementation 'org.quiltmc:quiltflower:1.9.0'
-}
-
-license {
-	rule file('codeformat/HEADER')
-
-	include '**/*.java'
-}
-
-java {
+	java {
 		sourceCompatibility = JavaVersion.VERSION_17
 		targetCompatibility = JavaVersion.VERSION_17
 
-	withSourcesJar()
-//	withJavadocJar()
-}
+		withSourcesJar()
+	}
 
-blossom {
-	replaceToken('${version}', version)
-}
-
-gradlePlugin {
-    plugins {
-        quilt_gradle {
-            id = 'org.quiltmc.gradle.base'
-            implementationClass = 'org.quiltmc.gradle.QuiltGradlePlugin'
-        }
-		quilt_minecraft {
-			id = 'org.quiltmc.gradle.minecraft'
-			implementationClass = 'org.quiltmc.gradle.minecraft.MinecraftPlugin'
-		}
-    }
-}
-
-publishing {
-	repositories {
-		maven {
-			url = System.getenv('MAVEN_URL')
-			credentials {
-				username = System.getenv('MAVEN_USERNAME')
-				password = System.getenv('MAVEN_PASSWORD')
+	publishing {
+		repositories {
+			maven {
+				url = System.getenv('MAVEN_URL')
+				credentials {
+					username = System.getenv('MAVEN_USERNAME')
+					password = System.getenv('MAVEN_PASSWORD')
+				}
 			}
 		}
 	}
