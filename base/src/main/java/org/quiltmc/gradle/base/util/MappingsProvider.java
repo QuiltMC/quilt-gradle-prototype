@@ -119,6 +119,10 @@ public class MappingsProvider {
 		loadSourceMappings();
 		loadViaMappings();
 
+		if (!viaMappings.containsKey(coordinate)) {
+			throw new RuntimeException("Could not get mappings with intermediate " + coordinate + ", please make sure to specify a `via` dependency on it.");
+		}
+
 		return getViaMappings(coordinate).reverse().merge(getMergedMappings());
 	}
 

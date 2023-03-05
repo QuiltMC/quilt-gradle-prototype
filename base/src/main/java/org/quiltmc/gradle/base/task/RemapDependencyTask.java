@@ -66,12 +66,14 @@ public abstract class RemapDependencyTask extends DefaultTask {
 				String version = getMappingsProvider().get().getMappingsName().replace(":", "_").replace("-", "_");
 
 				File inputFile = artifact.getFile();
+				MappingSet mappings = getMappings(inputFile);
+
 				File outputFile = getDirectory().get().getAsFile().toPath().resolve(group).resolve(name).resolve(version).resolve(name + "-" + version + ".jar").toFile();
 				outputFile.getParentFile().mkdirs();
 
 				if (!outputFile.exists()) {
 					getLogger().lifecycle("Remapping dependency " + inputFile.getName());
-					remapper.remap(inputFile, outputFile, getMappings(inputFile), false);
+					remapper.remap(inputFile, outputFile, mappings, false);
 				}
 
 				String notation = dependency.getGroup() + ":" + name + ":" + version;
