@@ -28,7 +28,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 
 public class ModMetadataHelper {
-	// Temporary until we do full metadata parsing
+	// TODO: Temporary until we do full metadata parsing
 	public static String getMappings(File jar) throws IOException, JsonParserException {
 		FileSystem jarFs = FileSystems.newFileSystem(jar.toPath());
 

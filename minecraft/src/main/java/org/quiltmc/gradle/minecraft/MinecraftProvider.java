@@ -65,7 +65,7 @@ public class MinecraftProvider {
 	}
 
 	public void provideLibraries(Configuration gameConf, Configuration librariesConf) throws FileNotFoundException, JsonParserException {
-		// I hate this but it's a quick fix
+		// TODO: I hate this but it's a quick fix, fix this properly
 		Optional<Dependency> game = gameConf.getDependencies().stream().findFirst();
 		if (game.isEmpty()) {
 			return;
@@ -87,7 +87,7 @@ public class MinecraftProvider {
 
 	private void mergeJars(File client, File server, File merged) {
 		try(JarMerger merger = new JarMerger(client, server, merged)) {
-			project.getLogger().lifecycle("QuildGradle: Merging Minecraft jars");
+			project.getLogger().lifecycle("QuiltGradle: Merging Minecraft jars");
 			merger.merge();
 		} catch (IOException e) {
 			throw new UncheckedIOException("Failed to merge Minecraft jars.", e);
@@ -118,7 +118,9 @@ public class MinecraftProvider {
 
 		URL url = new URL(versionUrl);
 		File localJson = new File(dir, "version.json");
-		Files.copy(url.openStream(), localJson.toPath(), StandardCopyOption.REPLACE_EXISTING);
+		if (!localJson.exists()) {
+			Files.copy(url.openStream(), localJson.toPath());
+		}
 
 		JsonObject versionJson = JsonParser.object().from(new FileReader(localJson));
 		JsonObject download = versionJson.getObject("downloads").getObject(artifact);
