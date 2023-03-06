@@ -1,0 +1,28 @@
+[versions]
+nano_json = "1.8"
+lorenz = "0.5.8"
+lorenz_tiny = "4.0.2"
+tiny_remapper = "0.7.2"
+quilt_json5 = "1.0.3"
+quiltflower = "1.9.0"
+stitch = "0.6.2"
+
+# Plugins
+licenser = "1.1.+"
+blossom = "1.3.+"
+
+[libraries]
+nano_json = { module = "com.grack:nanojson", version.ref = "nano_json" }
+lorenz = { module = "org.cadixdev:lorenz", version.ref = "lorenz" }
+lorenz_tiny = { module = "net.fabricmc:lorenz-tiny", version.ref = "lorenz_tiny" }
+tiny_remapper = { module = "org.quiltmc:tiny-remapper", version.ref = "tiny_remapper" }
+quilt_json5 = { module = "org.quiltmc:quilt-json5", version.ref = "quilt_json5" }
+quiltflower = { module = "org.quiltmc:quiltflower", version.ref = "quiltflower" }
+stitch = { module = "net.fabricmc:stitch", version.ref = "stitch" }
+
+[bundles]
+lorenz = ["lorenz", "lorenz_tiny"]
+
+[plugins]
+licenser = { id = "org.quiltmc.gradle.licenser", version.ref = "licenser" }
+blossom = { id = "net.kyori.blossom", version.ref = "blossom" }

@@ -1,10 +1,8 @@
-group 'org.quiltmc.gradle.minecraft'
-
 dependencies {
 	api project(':base')
 
-	implementation 'com.grack:nanojson:1.8'
-	implementation 'net.fabricmc:stitch:0.6.2'
+	implementation libs.nano.json
+	implementation libs.stitch
 }
 
 gradlePlugin {

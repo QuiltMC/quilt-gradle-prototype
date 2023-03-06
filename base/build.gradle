@@ -1,17 +1,14 @@
 apply plugin: 'net.kyori.blossom'
 
-group 'org.quiltmc.gradle.base'
-
 dependencies {
-	implementation 'com.grack:nanojson:1.8'
+	implementation libs.nano.json
 
-	implementation 'org.cadixdev:lorenz:0.5.8'
-	implementation 'net.fabricmc:lorenz-tiny:4.0.2'
+	implementation libs.bundles.lorenz
 
-	implementation 'org.quiltmc:tiny-remapper:0.7.2'
+	implementation libs.tiny.remapper
 
-	implementation 'org.quiltmc:quilt-json5:1.0.3'
-	implementation 'org.quiltmc:quiltflower:1.9.0'
+	implementation libs.quilt.json5
+	implementation libs.quiltflower
 }
 
 blossom {
